@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLEACH | GG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap');
+        body {
+            background-color: #0d1117;
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 20%);
+            color: #ffffff; font-family: 'Montserrat', sans-serif; min-height: 100vh;
+        }
+        .glass-panel { background: rgba(30, 35, 45, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; }
+        .text-glow { text-shadow: 0 0 15px rgba(255, 255, 255, 0.4); }
+        .text-gold { color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.3); }
+        
+        /* Стили для отрисованного Markdown внутри поста */
+        .markdown-body img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
+        .markdown-body h1, .markdown-body h2 { font-weight: bold; margin-top: 15px; }
+        .markdown-body p { margin-bottom: 10px; color: #cbd5e1; }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 50; justify-content: center; items-center; padding: 20px;}
+        .modal.active { display: flex; }
+        .star { cursor: pointer; color: #4b5563; transition: 0.2s; font-size: 24px; }
+        .star.active, .star:hover { color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); }
+    </style>
+</head>
+<body class="p-4 md:p-8 relative">
+
+    <header class="flex justify-between items-center max-w-7xl mx-auto mb-8">
+        <div class="w-32"></div>
+        <h1 class="text-4xl md:text-5xl font-black tracking-widest text-glow italic">BLEACH | GG</h1>
+        <div id="auth-section">
+            <button onclick="document.getElementById('login-modal').classList.add('active')" class="glass-panel px-4 py-2 text-sm font-semibold hover:bg-white/10">Войти</button>
+        </div>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto mb-10">
+        <div class="glass-panel p-5 flex flex-col">
+            <h2 class="text-lg font-bold mb-4">Статистика Кубков</h2>
+            <div id="chart-container" class="w-full h-[250px] flex-grow"></div>
+        </div>
+        <div class="glass-panel p-5 flex flex-col">
+            <h2 class="text-lg font-bold mb-4">Топ Участников</h2>
+            <div id="members-list" class="space-y-2 overflow-y-auto max-h-[250px]"></div>
+        </div>
+    </main>
+
+    <section class="max-w-7xl mx-auto">
+        <h3 class="text-xl font-bold mb-4">News Section</h3>
+        <div id="news-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </section>
+
+    <div id="login-modal" class="modal items-center">
+        <div class="glass-panel p-8 w-full max-w-sm relative">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+            <h2 class="text-2xl font-bold mb-4 text-center">Доступ Админа</h2>
+            <input id="login-user" type="text" placeholder="Логин" class="w-full mb-3 p-2 rounded bg-black/50 border border-gray-600 text-white outline-none focus:border-cyan-400">
+            <input id="login-pass" type="password" placeholder="Пароль" class="w-full mb-4 p-2 rounded bg-black/50 border border-gray-600 text-white outline-none focus:border-cyan-400">
+            <button onclick="login()" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 rounded font-bold">Войти</button>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="modal items-center">
+        <div class="glass-panel p-6 w-full max-w-2xl relative">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+            <h2 class="text-2xl font-bold mb-4">Создать Пост (Markdown)</h2>
+            <input id="post-title" type="text" placeholder="Заголовок поста" class="w-full mb-3 p-2 rounded bg-black/50 border border-gray-600 text-white">
+            <input id="post-cover" type="text" placeholder="URL обложки (картинка)" class="w-full mb-3 p-2 rounded bg-black/50 border border-gray-600 text-white">
+            <textarea id="post-content" rows="6" placeholder="Текст поста. Для картинки в тексте используй: ![Описание](ссылка)" class="w-full mb-4 p-2 rounded bg-black/50 border border-gray-600 text-white font-mono text-sm"></textarea>
+            <button onclick="createPost()" class="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded font-bold">Опубликовать</button>
+        </div>
+    </div>
+
+    <div id="read-modal" class="modal items-center">
+        <div class="glass-panel w-full max-w-3xl max-h-[90vh] flex flex-col relative overflow-hidden">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-white bg-black/50 rounded-full w-8 h-8 z-10 hover:bg-white/20">✕</button>
+            <div id="read-cover" class="w-full h-48 bg-cover bg-center"></div>
+            <div class="p-6 overflow-y-auto flex-grow">
+                <h2 id="read-title" class="text-3xl font-black mb-4"></h2>
+                <div id="read-content" class="markdown-body text-sm"></div>
+                
+                <div class="mt-8 pt-4 border-t border-gray-700 text-center">
+                    <p class="text-gray-400 text-sm mb-2">Оцените пост (Средняя: <span id="read-rating-avg" class="text-gold font-bold">0</span> / Голосов: <span id="read-rating-count">0</span>)</p>
+                    <div id="star-container" class="flex justify-center gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'https://bleach1.evgen20111110.workers.dev/api';
+        let globalNews = [];
+        let currentPostId = null;
+
+        // --- АВТОРИЗАЦИЯ И ИНТЕРФЕЙС ---
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                document.getElementById('auth-section').innerHTML = `
+                    <button onclick="document.getElementById('admin-modal').classList.add('active')" class="glass-panel px-3 py-2 text-sm text-purple-400 font-bold hover:bg-white/10 mr-2">+ Пост</button>
+                    <button onclick="logout()" class="glass-panel px-3 py-2 text-sm text-red-400 hover:bg-white/10">Выйти</button>
+                `;
+            } else {
+                document.getElementById('auth-section').innerHTML = `<button onclick="document.getElementById('login-modal').classList.add('active')" class="glass-panel px-4 py-2 text-sm font-semibold hover:bg-white/10">Войти</button>`;
+            }
+        }
+
+        async function login() {
+            const l = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+            const res = await fetch(`${API}/login`, { method: 'POST', body: JSON.stringify({login: l, password: p}) });
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('adminToken', data.token);
+                closeModals();
+                checkAuth();
+            } else { alert("Неверные данные!"); }
+        }
+
+        function logout() { localStorage.removeItem('adminToken'); checkAuth(); }
+
+        // --- СОЗДАНИЕ ПОСТА ---
+        async function createPost() {
+            const token = localStorage.getItem('adminToken');
+            const data = {
+                title: document.getElementById('post-title').value,
+                cover_url: document.getElementById('post-cover').value,
+                content: document.getElementById('post-content').value
+            };
+            await fetch(`${API}/news`, { method: 'POST', headers: { 'Authorization': token }, body: JSON.stringify(data) });
+            closeModals();
+            loadData(); // Перезагружаем новости
+        }
+
+        // --- ЧТЕНИЕ И ОЦЕНКА ПОСТА ---
+        function openPost(id) {
+            const post = globalNews.find(n => n.id === id);
+            currentPostId = id;
+            document.getElementById('read-cover').style.backgroundImage = `url('${post.image_url}')`;
+            document.getElementById('read-title').innerText = post.title;
+            document.getElementById('read-content').innerHTML = marked.parse(post.content || '');
+            
+            const avg = post.rating_count > 0 ? (post.rating_sum / post.rating_count).toFixed(1) : 0;
+            document.getElementById('read-rating-avg').innerText = avg;
+            document.getElementById('read-rating-count').innerText = post.rating_count;
+
+            // Звезды
+            const starsHTML = [1,2,3,4,5].map(i => `<span onclick="vote(${id}, ${i})" class="star">★</span>`).join('');
+            document.getElementById('star-container').innerHTML = starsHTML;
+            
+            document.getElementById('read-modal').classList.add('active');
+        }
+
+        async function vote(id, rating) {
+            if (localStorage.getItem(`voted_${id}`)) return alert("Вы уже голосовали за этот пост!");
+            await fetch(`${API}/vote`, { method: 'POST', body: JSON.stringify({id, rating}) });
+            localStorage.setItem(`voted_${id}`, 'true');
+            alert(`Спасибо! Ваша оценка: ${rating}`);
+            loadData(); // Обновляем стату в фоне
+            closeModals();
+        }
+
+        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
+
+        // --- ЗАГРУЗКА ДАННЫХ ---
+        async function loadData() {
+            try {
+                const res = await fetch(`${API}/data`);
+                const data = await res.json();
+                globalNews = data.news || [];
+
+                // Участники
+                document.getElementById('members-list').innerHTML = data.club.members.sort((a,b)=>b.trophies-a.trophies).slice(0,5).map((m, i) => `
+                    <div class="grid grid-cols-12 items-center p-3 glass-panel border border-transparent ${i<3?'border-cyan-500/30':''}">
+                        <div class="col-span-1 font-bold ${i===0?'text-gold':i===1?'text-gray-300':i===2?'text-orange-400':'text-gray-500'}">${i+1}.</div>
+                        <div class="col-span-6 font-bold text-sm truncate">${m.name}</div>
+                        <div class="col-span-5 text-right font-bold text-sm text-gold">${m.trophies} 🏆</div>
+                    </div>
+                `).join('');
+
+                // Новости
+                document.getElementById('news-grid').innerHTML = globalNews.map(n => {
+                    const avg = n.rating_count > 0 ? (n.rating_sum / n.rating_count).toFixed(1) : 0;
+                    return `
+                    <div onclick="openPost(${n.id})" class="glass-panel h-40 flex flex-col justify-end p-4 bg-cover bg-center cursor-pointer group relative" style="background-image: url('${n.image_url}')">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+                        <h4 class="font-bold text-sm z-10 group-hover:text-cyan-400 transition">${n.title}</h4>
+                        <div class="flex justify-between text-[10px] text-gray-300 z-10 mt-1">
+                            <span>${n.created_at.split(' ')[0]}</span>
+                            <span class="text-gold font-bold">★ ${avg}</span>
+                        </div>
+                    </div>`
+                }).join('');
+
+            } catch (err) { console.error(err); }
+        }
+
+        checkAuth();
+        loadData();
+    </script>
+</body>
+</html>
+
