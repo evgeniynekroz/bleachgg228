@@ -2,138 +2,170 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>BLEACH | GG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap');
-        body { background: #0d1117; color: white; font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(30, 35, 45, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
-        .text-gold { color: #facc15; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; padding: 15px; align-items: center; justify-content: center; }
+        :root { --accent: #facc15; }
+        body { background: #05070a; color: white; font-family: 'Montserrat', sans-serif; }
+        .glass { background: rgba(20, 25, 35, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; }
+        .text-glow { text-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
+        .btn-neon { background: var(--accent); color: black; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
-        /* Чтобы текст не переносился криво */
-        .no-wrap { white-space: nowrap; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
-<body class="p-3 md:p-8">
+<body class="p-4 md:p-10">
 
-    <header class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-        <h1 class="text-3xl md:text-5xl font-black italic tracking-tighter no-wrap">BLEACH | GG</h1>
-        <div id="auth-btn">
-            <button onclick="openModal('login-modal')" class="glass px-6 py-2 text-sm font-bold">ВОЙТИ</button>
+    <header class="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
+        <h1 class="text-5xl md:text-7xl font-black italic tracking-tighter text-glow uppercase">BLEACH<span class="text-white/20">|</span>GG</h1>
+        <div id="auth-zone">
+            <button onclick="openM('login-m')" class="glass px-8 py-3 text-xs font-bold tracking-widest hover:bg-white/5 transition">ВОЙТИ</button>
         </div>
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <div class="glass p-4">
-            <h2 class="text-sm font-bold mb-4 uppercase opacity-50">Статистика кубков</h2>
-            <div id="chart" class="w-full h-[200px]"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <div class="lg:col-span-2 glass p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xs font-bold opacity-40 uppercase tracking-widest text-accent">Trophy Growth</h2>
+                <span class="text-[10px] bg-white/5 px-2 py-1 rounded">Live Data</span>
+            </div>
+            <div id="chart" class="w-full h-[300px]"></div>
         </div>
-        <div class="glass p-4">
-            <h2 class="text-sm font-bold mb-4 uppercase opacity-50">Топ участников</h2>
-            <div id="list" class="space-y-2 max-h-[250px] overflow-y-auto pr-1"></div>
+        
+        <div class="glass p-6 flex flex-col">
+            <h2 class="text-xs font-bold opacity-40 uppercase tracking-widest mb-6">Top Members</h2>
+            <div id="list" class="space-y-3 overflow-y-auto pr-2">
+                <div class="animate-pulse space-y-3">
+                    <div class="h-10 bg-white/5 rounded-xl"></div>
+                    <div class="h-10 bg-white/5 rounded-xl"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="text-center my-10">
-        <h2 class="text-4xl md:text-7xl font-black text-gold tracking-widest">#CLLRR228</h2>
+    <div class="flex flex-col items-center mb-16">
+        <h2 class="text-6xl md:text-9xl font-black text-[#facc15] opacity-20 absolute -z-10 blur-sm">#CLLRR228</h2>
+        <h2 class="text-4xl md:text-6xl font-black tracking-widest mt-4">#CLLRR228</h2>
+        <div class="h-1 w-20 bg-yellow-400 mt-4 rounded-full"></div>
     </div>
 
-    <section>
-        <h3 class="font-bold mb-4 opacity-50 uppercase text-xs">Новости клуба</h3>
-        <div id="news" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+    <section class="max-w-6xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+            <h3 class="font-bold opacity-40 uppercase text-xs tracking-widest">Latest News</h3>
+            <div class="h-[1px] flex-grow bg-white/10"></div>
+        </div>
+        <div id="news" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
     </section>
 
-    <div id="login-modal" class="modal">
-        <div class="glass p-6 w-full max-w-sm">
-            <h2 class="text-xl font-bold mb-4">Админ-панель</h2>
-            <input id="l-usr" type="text" placeholder="Логин" class="w-full bg-black/40 p-3 rounded-xl mb-3 border border-white/10 outline-none">
-            <input id="l-pwd" type="password" placeholder="Пароль" class="w-full bg-black/40 p-3 rounded-xl mb-4 border border-white/10 outline-none">
-            <button onclick="login()" class="w-full bg-white text-black font-black py-3 rounded-xl">ВОЙТИ</button>
-            <button onclick="closeModal('login-modal')" class="w-full mt-2 text-xs opacity-50">Отмена</button>
+    <div id="login-m" class="modal">
+        <div class="glass p-8 w-full max-w-sm">
+            <h2 class="text-2xl font-black mb-6">ADMIN ACCESS</h2>
+            <input id="l-u" type="text" placeholder="LOGIN" class="w-full bg-white/5 p-4 rounded-2xl mb-3 outline-none focus:ring-1 ring-yellow-400 transition">
+            <input id="l-p" type="password" placeholder="PASSWORD" class="w-full bg-white/5 p-4 rounded-2xl mb-6 outline-none focus:ring-1 ring-yellow-400 transition">
+            <button onclick="doLogin()" class="w-full btn-neon font-black py-4 rounded-2xl">LOG IN</button>
+            <button onclick="closeM('login-m')" class="w-full mt-4 text-[10px] opacity-30 tracking-widest">CANCEL</button>
         </div>
     </div>
 
-    <div id="admin-modal" class="modal">
-        <div class="glass p-6 w-full max-w-lg">
-            <h2 class="text-xl font-bold mb-4">Новый пост</h2>
-            <input id="p-tit" type="text" placeholder="Заголовок" class="w-full bg-black/40 p-3 rounded-xl mb-2 border border-white/10">
-            <input id="p-img" type="text" placeholder="URL обложки" class="w-full bg-black/40 p-3 rounded-xl mb-2 border border-white/10">
-            <textarea id="p-con" placeholder="Текст (Markdown)" class="w-full bg-black/40 p-3 rounded-xl mb-4 border border-white/10 h-32"></textarea>
-            <button onclick="sendPost()" class="w-full bg-gold text-black font-black py-3 rounded-xl">ОПУБЛИКОВАТЬ</button>
+    <div id="admin-m" class="modal">
+        <div class="glass p-8 w-full max-w-2xl">
+            <h2 class="text-2xl font-black mb-6">CREATE POST</h2>
+            <input id="p-t" type="text" placeholder="Заголовок" class="w-full bg-white/5 p-4 rounded-2xl mb-3">
+            <input id="p-i" type="text" placeholder="URL картинки" class="w-full bg-white/5 p-4 rounded-2xl mb-3">
+            <textarea id="p-c" placeholder="Текст (Markdown)" class="w-full bg-white/5 p-4 rounded-2xl mb-6 h-48 outline-none"></textarea>
+            <div class="flex gap-4">
+                <button onclick="sendPost()" class="flex-grow btn-neon font-black py-4 rounded-2xl uppercase">Publish</button>
+                <button onclick="closeM('admin-m')" class="px-6 glass font-bold rounded-2xl">X</button>
+            </div>
         </div>
     </div>
 
     <script>
         const API = 'https://bleach1.evgen20111110.workers.dev/api';
         
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        const openM = id => document.getElementById(id).classList.add('active');
+        const closeM = id => document.getElementById(id).classList.remove('active');
 
-        async function login() {
+        async function doLogin() {
             const res = await fetch(`${API}/login`, {
                 method: 'POST',
-                body: JSON.stringify({ login: btoa(document.getElementById('l-usr').value), password: btoa(document.getElementById('l-pwd').value) }) 
+                body: JSON.stringify({ login: document.getElementById('l-u').value, password: document.getElementById('l-p').value })
             });
-            // Упростим для теста: просто проверяем статус
-            if(res.ok) {
-                localStorage.setItem('admin', 'true');
-                location.reload();
-            } else { alert('Ошибка!'); }
+            if(res.ok) { localStorage.setItem('is_admin', '1'); location.reload(); }
+            else { alert('Access Denied'); }
         }
 
-        async function load() {
-            if(localStorage.getItem('admin')) {
-                document.getElementById('auth-btn').innerHTML = `<button onclick="openModal('admin-modal')" class="bg-white text-black px-6 py-2 rounded-full font-bold text-xs">+ ПОСТ</button>`;
+        async function init() {
+            if(localStorage.getItem('is_admin')) {
+                document.getElementById('auth-zone').innerHTML = `
+                    <button onclick="openM('admin-m')" class="btn-neon px-6 py-2 rounded-full font-black text-[10px] mr-2">+ NEW POST</button>
+                    <button onclick="localStorage.clear();location.reload()" class="opacity-30 text-[10px]">EXIT</button>
+                `;
             }
 
-            const r = await fetch(`${API}/data`);
-            const d = await r.json();
+            try {
+                const r = await fetch(`${API}/data`);
+                const d = await r.json();
 
-            // Таблица
-            document.getElementById('list').innerHTML = d.club.members.sort((a,b)=>b.trophies-a.trophies).map((m, i) => `
-                <div class="flex justify-between items-center p-3 glass bg-white/5 border-none">
-                    <span class="text-xs font-bold opacity-30 w-6">${i+1}</span>
-                    <span class="flex-grow text-sm font-bold truncate mr-2">${m.name}</span>
-                    <span class="text-gold font-bold text-sm no-wrap">${m.trophies} 🏆</span>
-                </div>
-            `).join('');
-
-            // График
-            const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-                layout: { background: { color: 'transparent' }, textColor: '#555' },
-                grid: { vertLines: { visible: false }, horzLines: { color: '#222' } },
-                timeScale: { borderVisible: false }
-            });
-            const line = chart.addLineSeries({ color: '#facc15', lineWidth: 3 });
-            line.setData(d.chart.length ? d.chart : [{time: 1711280000, value: 0}]);
-            chart.timeScale().fitContent();
-
-            // Новости
-            document.getElementById('news').innerHTML = d.news.map(n => `
-                <div class="glass aspect-square overflow-hidden relative group cursor-pointer">
-                    <img src="${n.image_url}" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition">
-                    <div class="absolute inset-0 p-3 flex flex-col justify-end bg-gradient-to-t from-black to-transparent">
-                        <h4 class="text-[10px] md:text-xs font-bold leading-tight">${n.title}</h4>
+                // Таблица
+                document.getElementById('list').innerHTML = d.club.members.sort((a,b)=>b.trophies-a.trophies).map((m, i) => `
+                    <div class="flex justify-between items-center p-4 glass bg-white/5 border-none hover:bg-white/10 transition">
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] font-black opacity-20 w-4">${i+1}</span>
+                            <span class="text-sm font-bold truncate max-w-[120px]">${m.name}</span>
+                        </div>
+                        <span class="text-yellow-400 font-black text-sm tabular-nums">${m.trophies.toLocaleString()}</span>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+
+                // График
+                const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+                    layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#444' },
+                    grid: { vertLines: { visible: false }, horzLines: { color: '#111' } },
+                    rightPriceScale: { borderVisible: false },
+                    timeScale: { borderVisible: false },
+                });
+                const line = chart.addAreaSeries({ 
+                    lineColor: '#facc15', topColor: 'rgba(250, 204, 21, 0.2)', bottomColor: 'transparent', lineWidth: 3 
+                });
+                line.setData(d.chart.length ? d.chart : [{time: 1711280000, value: 0}]);
+                chart.timeScale().fitContent();
+
+                // Новости
+                document.getElementById('news').innerHTML = d.news.map(n => `
+                    <div class="glass aspect-[3/4] overflow-hidden relative group cursor-pointer border-none shadow-2xl">
+                        <img src="${n.image_url}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-4 flex flex-col justify-end">
+                            <h4 class="text-xs font-black leading-tight uppercase tracking-tighter">${n.title}</h4>
+                            <div class="flex justify-between mt-2 opacity-50 text-[8px] font-bold">
+                                <span>${n.created_at.split(' ')[0]}</span>
+                                <span>★ 5.0</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error('Stats fail:', e); }
         }
 
         async function sendPost() {
-            const data = {
-                title: document.getElementById('p-tit').value,
-                cover_url: document.getElementById('p-img').value,
-                content: document.getElementById('p-con').value
-            };
-            await fetch(`${API}/news`, { method: 'POST', body: JSON.stringify(data) });
+            await fetch(`${API}/news`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: document.getElementById('p-t').value,
+                    cover_url: document.getElementById('p-i').value,
+                    content: document.getElementById('p-c').value
+                })
+            });
             location.reload();
         }
 
-        load();
+        init();
     </script>
 </body>
 </html>
