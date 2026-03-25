@@ -5,147 +5,428 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLEACH | GG</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background: #0b0f13; color: #fff; font-family: 'Inter', sans-serif; }
-        
-        /* Glassmorphism со скриншота */
         .glass-panel { 
-            background: linear-gradient(135deg, rgba(35, 43, 53, 0.6) 0%, rgba(18, 22, 28, 0.8) 100%);
+            background: linear-gradient(135deg, rgba(35,43,53,0.6) 0%, rgba(18,22,28,0.8) 100%);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255,255,255,0.05);
             border-radius: 16px;
         }
-
-        .neon-border { border: 1px solid rgba(34, 211, 238, 0.3); box-shadow: 0 0 15px rgba(34, 211, 238, 0.1); }
-        .text-neon { color: #22d3ee; text-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
-        .tag-gold { color: #facc15; text-shadow: 0 0 20px rgba(250, 204, 21, 0.4); }
-
-        /* Таблица как на фото */
-        .member-row { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s; }
-        .member-row:hover { border-color: rgba(34, 211, 238, 0.5); background: rgba(34, 211, 238, 0.05); }
-
+        .text-neon { color: #22d3ee; text-shadow: 0 0 10px rgba(34,211,238,0.5); }
+        .tag-gold { color: #facc15; text-shadow: 0 0 20px rgba(250,204,21,0.4); }
+        .member-row { 
+            background: rgba(255,255,255,0.02); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            transition: all 0.3s; 
+            border-radius: 12px; 
+        }
+        .member-row:hover { border-color: rgba(34,211,238,0.5); background: rgba(34,211,238,0.05); }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal.active { display: flex; }
-
+        .tab-btn { border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-btn.active { color: #22d3ee; border-color: rgba(34,211,238,0.6); }
+        .chart-filter-btn { transition: all 0.2s; }
+        .chart-filter-btn.active { color: #22d3ee; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #22d3ee; border-radius: 10px; }
+        input::placeholder { color: rgba(255,255,255,0.2); }
+        .rank-1 { color: #facc15; }
+        .rank-2 { color: #94a3b8; }
+        .rank-3 { color: #cd7c2f; }
     </style>
 </head>
 <body class="p-4 md:p-8 max-w-7xl mx-auto">
 
+    <!-- Header -->
     <header class="flex justify-between items-center mb-10">
-        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter uppercase">BLEACH <span class="text-gray-500">|</span> GG</h1>
-        <div id="auth-ui">
-            <button onclick="document.getElementById('m-login').classList.add('active')" class="glass-panel px-6 py-2 text-[10px] font-bold uppercase border border-white/10 hover:bg-white/5 transition">Войти / Регистрация</button>
+        <div class="w-48"></div>
+        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-center">
+            BLEACH <span class="text-gray-500">|</span> GG
+        </h1>
+        <div id="auth-ui" class="w-48 flex justify-end">
+            <button onclick="openModal('m-auth')" class="glass-panel px-5 py-2.5 text-[10px] font-bold uppercase border border-white/10 hover:bg-white/5 transition whitespace-nowrap">
+                Войти / Регистрация
+            </button>
         </div>
     </header>
 
+    <!-- Main grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+
+        <!-- Chart panel -->
         <div class="glass-panel p-6">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center mb-3">
                 <h2 class="text-sm font-bold uppercase tracking-tight">Статистика Пуша Кубков</h2>
-                <div class="flex gap-2 text-[10px] font-bold opacity-50 uppercase">
-                    <span>1д</span><span>1м</span><span class="text-white">Все</span>
+                <div class="flex gap-3 text-[10px] font-bold uppercase">
+                    <button onclick="filterChart('1d', this)" class="chart-filter-btn opacity-40 hover:opacity-100">1Д</button>
+                    <button onclick="filterChart('1m', this)" class="chart-filter-btn opacity-40 hover:opacity-100">1М</button>
+                    <button id="btn-all" onclick="filterChart('all', this)" class="chart-filter-btn active">ВСЕ</button>
                 </div>
             </div>
-            <div id="main-chart" class="w-full h-[280px]"></div>
+            <!-- Legend -->
+            <div class="flex gap-5 mb-4 text-[9px] font-bold opacity-60">
+                <span class="flex items-center gap-1.5">
+                    <span class="w-4 h-[2px] bg-cyan-400 inline-block rounded"></span>Daily Change
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-4 h-[2px] bg-blue-400 inline-block rounded"></span>Weekly Average
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <span class="w-4 h-[2px] bg-purple-400 inline-block rounded"></span>Total
+                </span>
+            </div>
+            <div id="main-chart" class="w-full h-[260px]"></div>
         </div>
 
+        <!-- Members panel -->
         <div class="glass-panel p-6 flex flex-col">
-            <h2 class="text-sm font-bold uppercase tracking-tight mb-6">Топ Участников</h2>
-            <div class="grid grid-cols-4 text-[10px] font-bold opacity-30 uppercase mb-4 px-4">
+            <h2 class="text-sm font-bold uppercase tracking-tight mb-4">Топ Участников</h2>
+            <div class="grid grid-cols-4 text-[10px] font-bold opacity-30 uppercase mb-3 px-3">
                 <span>#</span><span>Игрок</span><span>#TAG</span><span class="text-right">Trophies</span>
             </div>
-            <div id="members-list" class="space-y-2 flex-grow overflow-y-auto pr-2">
-                </div>
-            <button class="w-full mt-4 py-2 glass-panel text-[10px] font-bold uppercase opacity-50 hover:opacity-100 transition">Показать еще</button>
+            <div id="members-list" class="space-y-2 flex-grow overflow-y-auto pr-1 max-h-72">
+                <div class="text-center opacity-30 text-xs py-10">Загрузка...</div>
+            </div>
+            <button id="show-more-btn" onclick="showMore()" class="w-full mt-4 py-2.5 glass-panel text-[10px] font-bold uppercase opacity-50 hover:opacity-100 transition hidden">
+                Показать еще
+            </button>
         </div>
     </div>
 
-    <div class="text-center mb-20">
+    <!-- Club tag -->
+    <div class="text-center mb-16">
         <h2 class="text-5xl md:text-6xl font-black tracking-widest tag-gold uppercase">#CLLRR228</h2>
     </div>
 
-    <section>
-        <h3 class="text-sm font-bold uppercase mb-8 opacity-70">News Section</h3>
-        <div id="news-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            </div>
+    <!-- News -->
+    <section class="mb-16">
+        <h3 class="text-sm font-bold uppercase mb-6 opacity-70">News Section</h3>
+        <div id="news-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
     </section>
 
-    <div id="m-login" class="modal">
-        <div class="glass-panel p-8 w-full max-w-xs border border-cyan-500/30">
-            <h2 class="text-xl font-black mb-6 uppercase italic">Admin Access</h2>
-            <input id="u" type="text" placeholder="ЛОГИН" class="w-full bg-black/40 p-4 rounded-xl mb-3 outline-none border border-white/5 focus:border-cyan-500/50">
-            <input id="p" type="password" placeholder="ПАРОЛЬ" class="w-full bg-black/40 p-4 rounded-xl mb-6 outline-none border border-white/5 focus:border-cyan-500/50">
-            <button onclick="handleLogin()" class="w-full bg-cyan-500 text-black font-black py-4 rounded-xl uppercase tracking-widest text-xs shadow-lg shadow-cyan-500/20">Войти</button>
-            <button onclick="this.closest('.modal').classList.remove('active')" class="w-full mt-4 text-[10px] opacity-30 uppercase">Отмена</button>
+    <!-- Auth Modal -->
+    <div id="m-auth" class="modal">
+        <div class="glass-panel p-8 w-full max-w-sm border border-cyan-500/30">
+            <!-- Tabs -->
+            <div class="flex mb-7 border-b border-white/10 gap-1">
+                <button onclick="switchTab('login')" id="tab-login" class="tab-btn active flex-1 pb-3 text-[11px] font-black uppercase">
+                    Войти
+                </button>
+                <button onclick="switchTab('register')" id="tab-register" class="tab-btn flex-1 pb-3 text-[11px] font-black uppercase opacity-40">
+                    Регистрация
+                </button>
+            </div>
+
+            <!-- Login form -->
+            <div id="form-login">
+                <input id="l-user" type="text" placeholder="ЛОГИН"
+                    class="w-full bg-black/40 p-4 rounded-xl mb-3 outline-none border border-white/5 focus:border-cyan-500/50 text-sm transition">
+                <input id="l-pass" type="password" placeholder="ПАРОЛЬ"
+                    class="w-full bg-black/40 p-4 rounded-xl mb-5 outline-none border border-white/5 focus:border-cyan-500/50 text-sm transition">
+                <div id="l-err" class="text-red-400 text-[10px] mb-3 text-center hidden"></div>
+                <button onclick="handleLogin()" 
+                    class="w-full bg-cyan-500 text-black font-black py-4 rounded-xl uppercase tracking-widest text-xs shadow-lg shadow-cyan-500/20 hover:bg-cyan-400 transition">
+                    Войти
+                </button>
+            </div>
+
+            <!-- Register form -->
+            <div id="form-register" class="hidden">
+                <input id="r-user" type="text" placeholder="ЛОГИН (мин. 3 символа)"
+                    class="w-full bg-black/40 p-4 rounded-xl mb-3 outline-none border border-white/5 focus:border-cyan-500/50 text-sm transition">
+                <input id="r-pass" type="password" placeholder="ПАРОЛЬ (мин. 6 символов)"
+                    class="w-full bg-black/40 p-4 rounded-xl mb-3 outline-none border border-white/5 focus:border-cyan-500/50 text-sm transition">
+                <input id="r-pass2" type="password" placeholder="ПОВТОРИ ПАРОЛЬ"
+                    class="w-full bg-black/40 p-4 rounded-xl mb-5 outline-none border border-white/5 focus:border-cyan-500/50 text-sm transition">
+                <div id="r-err" class="text-red-400 text-[10px] mb-3 text-center hidden"></div>
+                <button onclick="handleRegister()" 
+                    class="w-full bg-cyan-500 text-black font-black py-4 rounded-xl uppercase tracking-widest text-xs shadow-lg shadow-cyan-500/20 hover:bg-cyan-400 transition">
+                    Зарегистрироваться
+                </button>
+            </div>
+
+            <button onclick="closeModal('m-auth')" 
+                class="w-full mt-4 text-[10px] opacity-30 uppercase hover:opacity-60 transition">
+                Отмена
+            </button>
         </div>
     </div>
 
     <script>
         const API_URL = 'https://bleach1.evgen20111110.workers.dev/api';
+        let allMembers = [];
+        let showCount = 5;
+        let chartData = [];
+        let chartInstance = null;
+        let sSeries, wSeries, tSeries;
 
-        async function handleLogin() {
-            const r = await fetch(`${API_URL}/login`, {
-                method: 'POST',
-                body: JSON.stringify({ login: document.getElementById('u').value, password: document.getElementById('p').value })
-            });
-            if(r.ok) { localStorage.setItem('adm_auth', '1'); location.reload(); }
-            else { alert('Неверные данные'); }
+        // --- Modal ---
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // Close on backdrop click
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+        });
+
+        // --- Tabs ---
+        function switchTab(tab) {
+            const isLogin = tab === 'login';
+            document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+            document.getElementById('form-register').classList.toggle('hidden', isLogin);
+            document.getElementById('tab-login').classList.toggle('active', isLogin);
+            document.getElementById('tab-login').classList.toggle('opacity-40', !isLogin);
+            document.getElementById('tab-register').classList.toggle('active', !isLogin);
+            document.getElementById('tab-register').classList.toggle('opacity-40', isLogin);
         }
 
-        async function init() {
-            if(localStorage.getItem('adm_auth')) {
-                document.getElementById('auth-ui').innerHTML = `<button onclick="localStorage.clear();location.reload()" class="text-neon text-[10px] font-bold border border-cyan-500/30 px-4 py-2 rounded-lg">ВЫЙТИ (АДМИН)</button>`;
+        // --- Auth ---
+        function getUser() {
+            try { return JSON.parse(localStorage.getItem('auth_user')); } catch { return null; }
+        }
+
+        function updateAuthUI() {
+            const user = getUser();
+            if (!user) return;
+            document.getElementById('auth-ui').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <div class="text-[11px] font-black ${user.role === 'admin' ? 'text-neon' : 'text-white/80'}">
+                            ${user.login}${user.role === 'admin' ? ' 👑' : ''}
+                        </div>
+                        <div class="text-[9px] opacity-30 uppercase">${user.role}</div>
+                    </div>
+                    <button onclick="logout()" 
+                        class="glass-panel px-3 py-2 text-[9px] font-bold uppercase border border-white/10 hover:bg-white/5 transition">
+                        Выйти
+                    </button>
+                </div>`;
+        }
+
+        function logout() {
+            localStorage.removeItem('auth_user');
+            location.reload();
+        }
+
+        async function handleLogin() {
+            const login = document.getElementById('l-user').value.trim();
+            const password = document.getElementById('l-pass').value;
+            const errEl = document.getElementById('l-err');
+            errEl.classList.add('hidden');
+
+            if (!login || !password) {
+                errEl.textContent = 'Заполни все поля';
+                errEl.classList.remove('hidden');
+                return;
             }
 
             try {
+                const r = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login, password })
+                });
+                const data = await r.json();
+                if (r.ok) {
+                    localStorage.setItem('auth_user', JSON.stringify({ login: data.login, role: data.role }));
+                    closeModal('m-auth');
+                    updateAuthUI();
+                } else {
+                    errEl.textContent = data.error || 'Неверный логин или пароль';
+                    errEl.classList.remove('hidden');
+                }
+            } catch {
+                errEl.textContent = 'Ошибка соединения';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleRegister() {
+            const login = document.getElementById('r-user').value.trim();
+            const pass = document.getElementById('r-pass').value;
+            const pass2 = document.getElementById('r-pass2').value;
+            const errEl = document.getElementById('r-err');
+            errEl.classList.add('hidden');
+
+            if (login.length < 3) { errEl.textContent = 'Логин минимум 3 символа'; errEl.classList.remove('hidden'); return; }
+            if (pass.length < 6) { errEl.textContent = 'Пароль минимум 6 символов'; errEl.classList.remove('hidden'); return; }
+            if (pass !== pass2) { errEl.textContent = 'Пароли не совпадают'; errEl.classList.remove('hidden'); return; }
+
+            try {
+                const r = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login, password: pass })
+                });
+                const data = await r.json();
+                if (r.ok) {
+                    localStorage.setItem('auth_user', JSON.stringify({ login: data.login, role: 'user' }));
+                    closeModal('m-auth');
+                    updateAuthUI();
+                } else {
+                    errEl.textContent = data.error || 'Ошибка регистрации';
+                    errEl.classList.remove('hidden');
+                }
+            } catch {
+                errEl.textContent = 'Ошибка соединения';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        // --- Members ---
+        function showMore() {
+            showCount += 5;
+            renderMembers();
+        }
+
+        function renderMembers() {
+            const visible = allMembers.slice(0, showCount);
+            const rankClass = i => i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'opacity-20';
+
+            document.getElementById('members-list').innerHTML = visible.map((m, i) => `
+                <div class="member-row grid grid-cols-4 items-center p-3 px-4">
+                    <span class="text-[11px] font-black ${rankClass(i)}">${i+1}.</span>
+                    <span class="text-xs font-bold truncate pr-2">${m.name}</span>
+                    <span class="text-[9px] opacity-40 font-mono">${m.tag}</span>
+                    <span class="text-right text-xs font-black text-neon">${m.trophies.toLocaleString()} 🏆</span>
+                </div>
+            `).join('');
+
+            const btn = document.getElementById('show-more-btn');
+            btn.classList.toggle('hidden', allMembers.length <= showCount);
+        }
+
+        // --- Chart ---
+        function buildSeries(points) {
+            const total = points.map(p => ({ time: p.time, value: p.value }));
+            const daily = points.map((p, i) => ({
+                time: p.time,
+                value: i === 0 ? 0 : Math.max(0, p.value - points[i - 1].value)
+            }));
+            const weekly = points.map((p, i) => {
+                const slice = points.slice(Math.max(0, i - 6), i + 1);
+                return { time: p.time, value: Math.round(slice.reduce((s, x) => s + x.value, 0) / slice.length) };
+            });
+            return { total, daily, weekly };
+        }
+
+        function updateChart(points) {
+            if (!points.length) return;
+            const { total, daily, weekly } = buildSeries(points);
+            sSeries.setData(daily);
+            wSeries.setData(weekly);
+            tSeries.setData(total);
+            chartInstance.timeScale().fitContent();
+        }
+
+        function filterChart(range, btn) {
+            document.querySelectorAll('.chart-filter-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('opacity-40');
+            });
+            btn.classList.add('active');
+            btn.classList.remove('opacity-40');
+
+            let filtered = [...chartData];
+            const now = Math.floor(Date.now() / 1000);
+            if (range === '1d') filtered = chartData.filter(p => p.time >= now - 86400);
+            if (range === '1m') filtered = chartData.filter(p => p.time >= now - 2592000);
+            if (!filtered.length) filtered = chartData;
+            updateChart(filtered);
+        }
+
+        // --- Init ---
+        async function init() {
+            updateAuthUI();
+
+            try {
                 const res = await fetch(`${API_URL}/data`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
 
-                // Рендер игроков
-                document.getElementById('members-list').innerHTML = data.club.members.sort((a,b)=>b.trophies-a.trophies).slice(0,6).map((m, i) => `
-                    <div class="member-row grid grid-cols-4 items-center p-3 rounded-xl px-4">
-                        <span class="text-[10px] font-black opacity-20">${i+1}.</span>
-                        <span class="text-xs font-bold truncate pr-2">${m.name}</span>
-                        <span class="text-[9px] opacity-40 font-mono">${m.tag}</span>
-                        <span class="text-right text-xs font-black text-neon">${m.trophies.toLocaleString()} 🏆</span>
-                    </div>
-                `).join('');
+                // Members
+                allMembers = (data.club?.members || []).sort((a, b) => b.trophies - a.trophies);
+                if (allMembers.length) {
+                    renderMembers();
+                } else {
+                    document.getElementById('members-list').innerHTML = '<div class="text-center opacity-30 text-xs py-10">Нет данных</div>';
+                }
 
-                // Рендер графика
-                const chart = LightweightCharts.createChart(document.getElementById('main-chart'), {
-                    layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#445' },
-                    grid: { vertLines: { color: 'rgba(255,255,255,0.02)' }, horzLines: { color: 'rgba(255,255,255,0.02)' } },
-                    timeScale: { borderVisible: false },
-                    rightPriceScale: { borderVisible: false }
+                // Chart
+                chartData = (data.chart || [])
+                    .map(p => ({ time: parseInt(p.time), value: parseInt(p.value) }))
+                    .filter(p => p.time > 0 && p.value > 0);
+
+                // Fallback if no data
+                if (chartData.length < 2) {
+                    chartData = [
+                        { time: 1711200000, value: 1400000 },
+                        { time: 1711286400, value: 1450000 },
+                        { time: 1711372800, value: 1480000 },
+                        { time: 1711459200, value: 1500000 },
+                    ];
+                }
+
+                chartInstance = LightweightCharts.createChart(document.getElementById('main-chart'), {
+                    layout: { background: { type: 'solid', color: 'transparent' }, textColor: 'rgba(255,255,255,0.25)' },
+                    grid: { vertLines: { color: 'rgba(255,255,255,0.02)' }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
+                    timeScale: { borderVisible: false, timeVisible: true },
+                    rightPriceScale: { borderVisible: false },
+                    handleScroll: true,
+                    handleScale: false,
+                    crosshair: { mode: 1 },
                 });
 
-                const lineStyle = { lineWidth: 3, lineType: 0 };
-                const s1 = chart.addAreaSeries({ ...lineStyle, lineColor: '#22d3ee', topColor: 'rgba(34,211,238,0.1)', bottomColor: 'transparent' });
-                const s2 = chart.addAreaSeries({ ...lineStyle, lineColor: '#3b82f6', topColor: 'rgba(59,130,246,0.1)', bottomColor: 'transparent' });
-                
-                const points = data.chart.map(p => ({ time: parseInt(p.time), value: parseInt(p.value) }));
-                s1.setData(points.length ? points : [{time: 1711280000, value: 1500000}]);
-                chart.timeScale().fitContent();
+                sSeries = chartInstance.addLineSeries({ color: '#22d3ee', lineWidth: 2, priceLineVisible: false });
+                wSeries = chartInstance.addLineSeries({ color: '#3b82f6', lineWidth: 2, priceLineVisible: false });
+                tSeries = chartInstance.addAreaSeries({
+                    lineColor: '#a855f7',
+                    topColor: 'rgba(168,85,247,0.2)',
+                    bottomColor: 'transparent',
+                    lineWidth: 2,
+                    priceLineVisible: false
+                });
 
-                // Рендер новостей
-                document.getElementById('news-grid').innerHTML = data.news.map(n => `
-                    <div class="glass-panel overflow-hidden group cursor-pointer border-none shadow-2xl">
-                        <div class="aspect-video relative overflow-hidden">
-                            <img src="${n.image_url}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-                        </div>
-                        <div class="p-4 bg-gradient-to-b from-transparent to-black/40">
-                            <h4 class="text-xs font-bold leading-tight mb-2 uppercase">${n.title}</h4>
-                            <span class="text-[9px] opacity-30 font-bold">${n.created_at.split(' ')[0]}</span>
-                        </div>
-                    </div>
-                `).join('');
+                updateChart(chartData);
 
-            } catch(e) { console.error('Data fail:', e); }
+                // News
+                const news = data.news || [];
+                document.getElementById('news-grid').innerHTML = news.length
+                    ? news.map(n => `
+                        <div class="glass-panel overflow-hidden group cursor-pointer hover:scale-[1.02] transition duration-300">
+                            <div class="aspect-video relative overflow-hidden bg-white/5">
+                                <img src="${n.image_url || ''}" 
+                                    class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                                    onerror="this.style.display='none'">
+                            </div>
+                            <div class="p-4">
+                                <h4 class="text-xs font-bold leading-tight mb-2 uppercase">${n.title || ''}</h4>
+                                <span class="text-[9px] opacity-30 font-bold">${(n.created_at || '').split(' ')[0]}</span>
+                            </div>
+                        </div>
+                    `).join('')
+                    : '<div class="col-span-4 text-center opacity-30 text-xs py-8">Новостей пока нет</div>';
+
+            } catch (e) {
+                console.error('Init error:', e);
+                document.getElementById('members-list').innerHTML = `
+                    <div class="text-center py-10">
+                        <div class="text-red-400 text-xs mb-1">Ошибка загрузки</div>
+                        <div class="text-[10px] opacity-30">${e.message}</div>
+                    </div>`;
+            }
         }
+
+        // Enter key support
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Enter') return;
+            if (!document.getElementById('form-login').classList.contains('hidden')) handleLogin();
+            else if (!document.getElementById('form-register').classList.contains('hidden')) handleRegister();
+        });
+
         init();
     </script>
 </body>
