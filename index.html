@@ -4,580 +4,283 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BLEACH | GG</title>
-<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-
-<!-- SVG Liquid Glass Filter -->
-<svg style="position:absolute;width:0;height:0;overflow:hidden">
-  <defs>
-    <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.015 0.015" numOctaves="2" seed="92" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
-      <feGaussianBlur in="displaced" stdDeviation="0.4" result="blurred"/>
-      <feComposite in="blurred" in2="SourceGraphic" operator="in"/>
-    </filter>
-  </defs>
-</svg>
-
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-top:    #2d0a4e;
-  --bg-mid:    #120820;
-  --bg-bot:    #000000;
-  --glass-bg:  rgba(255,255,255,0.06);
-  --glass-border: rgba(255,255,255,0.14);
-  --glass-shine: rgba(255,255,255,0.22);
-  --text:      #f0eeff;
-  --text-dim:  rgba(240,238,255,0.45);
-  --text-mid:  rgba(240,238,255,0.7);
-  --accent:    #bf7fff;
-  --accent2:   #7c3aed;
-  --cyan:      #67e8f9;
-  --green:     #4ade80;
-  --yellow:    #fbbf24;
-  --red:       #f87171;
-
-  --role-president:   #fbbf24;
-  --role-vice:        #c084fc;
-  --role-senior:      #67e8f9;
-  --role-member:      rgba(255,255,255,0.4);
+  --glass-bg:     rgba(255,255,255,0.07);
+  --glass-border: rgba(255,255,255,0.13);
+  --glass-shine:  rgba(255,255,255,0.18);
+  --text:         #f0eeff;
+  --text-dim:     rgba(240,238,255,0.4);
+  --text-mid:     rgba(240,238,255,0.65);
+  --accent:       #bf7fff;
+  --accent2:      #7c3aed;
+  --yellow:       #fbbf24;
+  --red:          #f87171;
+  --green:        #4ade80;
+  --cyan:         #67e8f9;
+  --purple:       #c084fc;
 }
 
 html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', -apple-system, sans-serif;
-  background: linear-gradient(170deg, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bot) 100%);
+  background: #0a0010;
+  background-image: radial-gradient(ellipse 80% 60% at 50% 0%, #3b0764 0%, #1a0030 40%, #000000 100%);
   background-attachment: fixed;
   min-height: 100vh;
   color: var(--text);
   overflow-x: hidden;
 }
 
-/* ── NOISE OVERLAY ── */
+/* noise */
 body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
-/* ── LIQUID GLASS CARD ── */
+/* Hide TradingView watermark/logo link */
+.tv-lightweight-charts a,
+.tv-lightweight-charts table { display:none !important; pointer-events:none !important; }
+
+/* ── GLASS CARD ── */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   position: relative;
   overflow: hidden;
 }
 .glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--glass-shine) 0%, transparent 50%, transparent 100%);
-  pointer-events: none;
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background: linear-gradient(135deg, var(--glass-shine) 0%, transparent 45%);
 }
 
-/* ── LIQUID GLASS BUTTON (iOS 26 style) ── */
-.btn-glass {
+/* ── iOS 26 BUTTON ── */
+.btn {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; justify-content: center;
   gap: 6px;
-  padding: 10px 20px;
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255,255,255,0.2);
+  padding: 9px 18px;
   border-radius: 50px;
-  color: var(--text);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.09);
+  color: var(--text);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   white-space: nowrap;
-  position: relative;
-  overflow: hidden;
-  filter: url(#liquid-glass);
+  letter-spacing: 0.2px;
 }
-.btn-glass::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
-  border-radius: inherit;
-  pointer-events: none;
+.btn:hover  { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.28); transform: scale(1.02); }
+.btn:active { transform: scale(0.97); }
+.btn.accent {
+  background: rgba(124,58,237,0.38);
+  border-color: rgba(191,127,255,0.45);
+  color: #e9d5ff;
 }
-.btn-glass:hover {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(255,255,255,0.3);
-  transform: scale(1.02);
-}
-.btn-glass:active { transform: scale(0.98); }
-.btn-glass.accent {
-  background: rgba(124,58,237,0.35);
-  border-color: rgba(191,127,255,0.4);
-}
-.btn-glass.accent:hover { background: rgba(124,58,237,0.5); }
+.btn.accent:hover { background: rgba(124,58,237,0.55); }
+.btn.wide { width:100%; justify-content:center; border-radius:14px; padding:12px; font-size:14px; font-weight:700; }
 
 /* ── LAYOUT ── */
-.page { max-width: 1200px; margin: 0 auto; padding: 0 16px 60px; }
+.page { max-width: 1200px; margin: 0 auto; padding: 0 16px 80px; }
 
 /* ── HEADER ── */
 header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 0 24px;
-  gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0 22px; gap: 12px; flex-wrap: wrap;
 }
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.logo { display:flex; align-items:center; gap:12px; }
 .logo-badge {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid var(--glass-border);
-  display: flex; align-items: center; justify-content: center;
+  width:46px; height:46px; border-radius:13px; overflow:hidden;
+  background:rgba(255,255,255,0.07); border:1px solid var(--glass-border);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.logo-badge img { width: 100%; height: 100%; object-fit: contain; }
+.logo-badge img { width:100%; height:100%; object-fit:contain; }
 .logo-name {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size:21px; font-weight:800; letter-spacing:-0.5px;
+  background: linear-gradient(120deg,#fff 0%,var(--accent) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
-.logo-tag {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-top: 1px;
-}
+.logo-tag { font-size:10px; font-weight:600; color:var(--text-dim); letter-spacing:1.2px; text-transform:uppercase; margin-top:1px; }
 
-/* ── HERO STATS ROW ── */
-.hero-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-@media (max-width: 500px) {
-  .hero-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-}
-.stat-card {
-  padding: 16px;
-  text-align: center;
-}
+/* ── STATS ROW ── */
+.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.stat-card { padding:14px 10px; text-align:center; }
 .stat-val {
-  font-size: clamp(20px, 4vw, 28px);
-  font-weight: 800;
-  letter-spacing: -1px;
-  background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-  margin-bottom: 4px;
+  font-size:clamp(18px,5vw,26px); font-weight:800; letter-spacing:-1px; line-height:1; margin-bottom:3px;
+  background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
-.stat-lbl {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-dim);
+.stat-lbl { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); }
+
+/* ── SEC TITLE ── */
+.sec-title {
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.8px;
+  color:var(--text-dim); margin-bottom:12px; display:flex; align-items:center; gap:8px;
 }
+.sec-title::after { content:''; flex:1; height:1px; background:var(--glass-border); }
 
 /* ── MAIN GRID ── */
-.main-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-@media (min-width: 900px) {
-  .main-grid { grid-template-columns: 1fr 1fr; }
-}
-
-/* ── SECTION TITLE ── */
-.sec-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--text-dim);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.sec-title::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--glass-border);
-}
+.main-grid { display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:16px; }
+@media(min-width:860px){ .main-grid{ grid-template-columns:1fr 1fr; } }
 
 /* ── CHART ── */
-.chart-card { padding: 20px; }
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-.chart-filters { display: flex; gap: 6px; }
+.chart-card { padding:18px; }
+.chart-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+.chart-filters { display:flex; gap:6px; }
 .cf-btn {
-  padding: 5px 12px;
-  background: transparent;
-  border: 1px solid var(--glass-border);
-  border-radius: 50px;
-  color: var(--text-dim);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .15s;
+  padding:4px 12px; border-radius:50px; font-size:11px; font-weight:600; cursor:pointer;
+  border:1px solid var(--glass-border); background:transparent; color:var(--text-dim); transition:all .14s;
 }
-.cf-btn:hover, .cf-btn.active {
-  background: rgba(191,127,255,0.2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-.chart-legend {
-  display: flex; gap: 16px;
-  font-size: 10px; font-weight: 600;
-  color: var(--text-dim);
-  margin-bottom: 14px;
-}
-.chart-legend span { display: flex; align-items: center; gap: 5px; }
-.dot { width: 12px; height: 2px; border-radius: 2px; }
+.cf-btn:hover,.cf-btn.active { background:rgba(191,127,255,0.18); border-color:var(--accent); color:var(--accent); }
+.chart-legend { display:flex; gap:14px; font-size:10px; font-weight:600; color:var(--text-dim); margin-bottom:10px; flex-wrap:wrap; }
+.chart-legend span { display:flex; align-items:center; gap:5px; }
+.ldot { width:14px; height:2px; border-radius:2px; display:inline-block; }
+
+/* CHART CONTAINER — pointer-events block so no click-through to TW */
+#main-chart { width:100%; height:220px; cursor:crosshair; }
+#main-chart a { display:none !important; }
 
 /* ── MEMBERS ── */
-.members-card { padding: 20px; }
+.members-card { padding:18px; }
 .members-head {
-  display: grid;
-  grid-template-columns: 32px 36px 1fr 80px 80px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-  padding: 0 10px;
-  margin-bottom: 8px;
-  gap: 8px;
+  display:grid;
+  grid-template-columns: 28px 36px 1fr 70px;
+  font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px;
+  color:var(--text-dim); padding:0 8px; margin-bottom:6px; gap:8px;
+}
+@media(min-width:480px){
+  .members-head { grid-template-columns:28px 36px 1fr 90px 72px; }
 }
 .member-row {
-  display: grid;
-  grid-template-columns: 32px 36px 1fr 80px 80px;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 12px;
-  transition: background .15s;
-  cursor: default;
-  margin-bottom: 4px;
+  display:grid;
+  grid-template-columns: 28px 36px 1fr 70px;
+  align-items:center; gap:8px; padding:9px 8px; border-radius:12px;
+  transition:background .14s; margin-bottom:3px; cursor:default;
 }
-.member-row:hover { background: rgba(255,255,255,0.05); }
-.m-rank {
-  font-size: 12px;
-  font-weight: 800;
-  text-align: center;
-  color: var(--text-dim);
+@media(min-width:480px){
+  .member-row { grid-template-columns:28px 36px 1fr 90px 72px; }
+  .m-tag-col { display:block !important; }
 }
-.m-rank.gold   { color: var(--yellow); }
-.m-rank.silver { color: #cbd5e1; }
-.m-rank.bronze { color: #cd7c2f; }
+.member-row:hover { background:rgba(255,255,255,0.05); }
+.m-rank { font-size:12px; font-weight:800; text-align:center; color:var(--text-dim); }
+.m-rank.gold   { color:var(--yellow); }
+.m-rank.silver { color:#cbd5e1; }
+.m-rank.bronze { color:#cd7c2f; }
 .m-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid var(--glass-border);
-  overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
+  width:34px; height:34px; border-radius:50%;
+  background:rgba(255,255,255,0.07); border:1px solid var(--glass-border);
+  overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;
 }
-.m-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.m-info { min-width: 0; }
-.m-name {
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.m-role {
-  font-size: 10px;
-  font-weight: 600;
-  margin-top: 1px;
-}
-.role-president  { color: var(--role-president); }
-.role-vice       { color: var(--role-vice); }
-.role-senior     { color: var(--role-senior); }
-.role-member     { color: var(--role-member); }
-.m-tag {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-dim);
-  font-family: monospace;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.m-trophies {
-  text-align: right;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--yellow);
-  white-space: nowrap;
-}
+.m-avatar img { width:100%; height:100%; object-fit:cover; }
+.m-info { min-width:0; }
+.m-name { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
+.m-role { font-size:10px; font-weight:600; margin-top:2px; white-space:nowrap; }
+.role-president   { color:var(--yellow); }
+.role-vice        { color:var(--purple); }
+.role-senior      { color:var(--cyan); }
+.role-member      { color:var(--text-dim); }
+.m-tag-col { font-size:10px; font-weight:600; color:var(--text-dim); font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:none; }
+.m-trophies { text-align:right; font-size:13px; font-weight:800; color:var(--yellow); white-space:nowrap; }
 
 /* ── NEWS ── */
-.news-section { margin-bottom: 20px; }
-.news-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-@media (min-width: 640px) { .news-grid { grid-template-columns: repeat(4, 1fr); } }
-.news-card {
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform .2s, box-shadow .2s;
-}
-.news-card:hover { transform: translateY(-3px); }
-.news-thumb {
-  aspect-ratio: 16/9;
-  background: rgba(255,255,255,0.05);
-  overflow: hidden;
-}
-.news-thumb img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transition: transform .3s;
-}
-.news-card:hover .news-thumb img { transform: scale(1.05); }
-.news-body { padding: 10px 12px 12px; }
-.news-title {
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.4;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 4px;
-}
-.news-date { font-size: 9px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; }
+.news-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+@media(min-width:600px){ .news-grid{ grid-template-columns:repeat(4,1fr); } }
+.news-card { overflow:hidden; cursor:pointer; transition:transform .18s; }
+.news-card:hover { transform:translateY(-3px); }
+.news-thumb { aspect-ratio:16/9; background:rgba(255,255,255,0.05); overflow:hidden; position:relative; }
+.news-thumb img { width:100%; height:100%; object-fit:cover; transition:transform .3s; display:block; }
+.news-card:hover .news-thumb img { transform:scale(1.06); }
+.news-body { padding:10px 12px 12px; }
+.news-title { font-size:11px; font-weight:700; line-height:1.4; text-transform:uppercase; letter-spacing:0.2px; margin-bottom:4px; }
+.news-date  { font-size:9px; font-weight:600; color:var(--text-dim); text-transform:uppercase; }
+
+/* ── NEWS MODAL ── */
+.news-modal-img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:12px; margin-bottom:16px; display:block; background:rgba(255,255,255,0.05); }
+.news-modal-title { font-size:18px; font-weight:800; line-height:1.3; margin-bottom:8px; letter-spacing:-0.3px; }
+.news-modal-date { font-size:11px; font-weight:600; color:var(--text-dim); margin-bottom:14px; text-transform:uppercase; letter-spacing:1px; }
+.news-modal-content { font-size:14px; line-height:1.7; color:var(--text-mid); white-space:pre-wrap; }
 
 /* ── MODAL ── */
 .modal {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  z-index:1000; align-items:center; justify-content:center; padding:20px;
 }
-.modal.active { display: flex; }
-.modal-box {
-  width: 100%;
-  max-width: 380px;
-  padding: 28px 24px;
-}
+.modal.active { display:flex; }
+.modal-box { width:100%; max-width:380px; padding:26px 22px; max-height:90vh; overflow-y:auto; }
+.modal-box.wide { max-width:520px; }
 .modal-title {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  margin-bottom: 20px;
-  text-align: center;
-  background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size:20px; font-weight:800; letter-spacing:-0.4px; margin-bottom:18px; text-align:center;
+  background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
 .modal-tabs {
-  display: flex;
-  background: rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 3px;
-  margin-bottom: 20px;
-  border: 1px solid var(--glass-border);
+  display:flex; background:rgba(255,255,255,0.05); border-radius:12px;
+  padding:3px; margin-bottom:18px; border:1px solid var(--glass-border);
 }
 .mtab {
-  flex: 1;
-  padding: 8px;
-  background: transparent;
-  border: none;
-  border-radius: 10px;
-  color: var(--text-dim);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .15s;
+  flex:1; padding:8px; background:transparent; border:none; border-radius:10px;
+  color:var(--text-dim); font-size:13px; font-weight:600; cursor:pointer; transition:all .14s;
 }
-.mtab.active {
-  background: rgba(124,58,237,0.35);
-  color: var(--text);
-  border: 1px solid rgba(191,127,255,0.3);
-}
+.mtab.active { background:rgba(124,58,237,0.38); color:var(--text); border:1px solid rgba(191,127,255,0.3); }
 .m-input {
-  display: block;
-  width: 100%;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 12px 14px;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  outline: none;
-  margin-bottom: 10px;
-  transition: border-color .15s, background .15s;
-  backdrop-filter: blur(10px);
+  display:block; width:100%;
+  background:rgba(255,255,255,0.06); border:1px solid var(--glass-border); border-radius:12px;
+  padding:11px 14px; color:var(--text); font-family:'Inter',sans-serif; font-size:14px; font-weight:500;
+  outline:none; margin-bottom:10px; transition:border-color .14s, background .14s;
+  backdrop-filter:blur(10px);
 }
-.m-input::placeholder { color: var(--text-dim); }
-.m-input:focus {
-  border-color: rgba(191,127,255,0.5);
-  background: rgba(255,255,255,0.09);
-}
-textarea.m-input { resize: vertical; min-height: 80px; }
-.m-err {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--red);
-  text-align: center;
-  min-height: 16px;
-  margin-bottom: 8px;
-  letter-spacing: 0.3px;
-}
-.btn-submit {
-  display: block;
-  width: 100%;
-  padding: 13px;
-  background: rgba(124,58,237,0.4);
-  border: 1px solid rgba(191,127,255,0.4);
-  border-radius: 14px;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-  backdrop-filter: blur(20px);
-  transition: all .2s;
-  filter: url(#liquid-glass);
-  position: relative;
-  overflow: hidden;
-}
-.btn-submit::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
-  pointer-events: none;
-}
-.btn-submit:hover { background: rgba(124,58,237,0.6); transform: scale(1.01); }
-.btn-cancel {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: color .15s;
-}
-.btn-cancel:hover { color: var(--text); }
+.m-input::placeholder { color:var(--text-dim); }
+.m-input:focus { border-color:rgba(191,127,255,0.5); background:rgba(255,255,255,0.09); }
+textarea.m-input { resize:vertical; min-height:80px; }
+.m-err { font-size:11px; font-weight:600; color:var(--red); text-align:center; min-height:16px; margin-bottom:8px; }
+.m-cancel { display:block; width:100%; padding:9px; background:none; border:none; color:var(--text-dim); font-size:12px; font-weight:600; cursor:pointer; margin-top:8px; transition:color .14s; }
+.m-cancel:hover { color:var(--text); }
 
 /* ── ADMIN PANEL ── */
-.admin-panel {
-  margin-bottom: 20px;
-  padding: 20px;
-}
-.admin-title {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.admin-panel { padding:18px; margin-bottom:16px; }
+.admin-top { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
 .admin-badge {
-  background: rgba(251,191,36,0.15);
-  border: 1px solid rgba(251,191,36,0.3);
-  color: var(--yellow);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 50px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3);
+  color:var(--yellow); font-size:9px; font-weight:700; padding:2px 8px;
+  border-radius:50px; text-transform:uppercase; letter-spacing:1px;
 }
 
-/* ── USER DISPLAY ── */
-.user-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* ── USER PILL ── */
 .user-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid var(--glass-border);
-  border-radius: 50px;
-  padding: 6px 14px 6px 8px;
-  backdrop-filter: blur(20px);
+  display:flex; align-items:center; gap:8px;
+  background:rgba(255,255,255,0.07); border:1px solid var(--glass-border);
+  border-radius:50px; padding:5px 12px 5px 7px; backdrop-filter:blur(16px);
 }
 .user-avatar-sm {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  background: rgba(124,58,237,0.3);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px;
+  width:26px; height:26px; border-radius:50%;
+  background:rgba(124,58,237,0.3); display:flex; align-items:center; justify-content:center; font-size:13px;
 }
-.user-name-txt { font-size: 13px; font-weight: 700; }
-.user-role-txt { font-size: 10px; font-weight: 600; color: var(--accent); }
+.user-name-txt { font-size:13px; font-weight:700; }
+.user-role-txt { font-size:10px; font-weight:600; color:var(--accent); }
 
-/* ── SKEL ── */
+/* ── SKELETON ── */
 .skel {
-  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 10px;
+  background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%);
+  background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:10px;
 }
 @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-/* ── SHOW MORE ── */
-#show-more-btn { margin-top: 10px; width: 100%; }
+.empty { text-align:center; padding:28px; color:var(--text-dim); font-size:13px; font-weight:500; }
 
-/* ── EMPTY STATE ── */
-.empty {
-  text-align: center;
-  padding: 30px;
-  color: var(--text-dim);
-  font-size: 13px;
-  font-weight: 500;
-}
+.divider { height:1px; background:var(--glass-border); margin:16px 0; }
 </style>
 </head>
 <body>
@@ -587,7 +290,7 @@ textarea.m-input { resize: vertical; min-height: 80px; }
   <header>
     <div class="logo">
       <div class="logo-badge">
-        <img id="club-badge" src="" alt="Club" onerror="this.style.display='none'">
+        <img id="club-badge" src="" alt="" onerror="this.style.display='none'">
       </div>
       <div>
         <div class="logo-name">BLEACH | GG</div>
@@ -595,46 +298,35 @@ textarea.m-input { resize: vertical; min-height: 80px; }
       </div>
     </div>
     <div id="auth-ui">
-      <button class="btn-glass" onclick="openModal('m-auth')">Войти</button>
+      <button class="btn" onclick="openModal('m-auth')">Войти</button>
     </div>
   </header>
 
-  <!-- HERO STATS -->
-  <div class="hero-stats" style="margin-bottom:20px">
-    <div class="glass stat-card">
-      <div class="stat-val" id="stat-members">—</div>
-      <div class="stat-lbl">Участников</div>
-    </div>
-    <div class="glass stat-card">
-      <div class="stat-val" id="stat-trophies">—</div>
-      <div class="stat-lbl">Кубков</div>
-    </div>
-    <div class="glass stat-card">
-      <div class="stat-val" id="stat-avg">—</div>
-      <div class="stat-lbl">Avg</div>
-    </div>
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="glass stat-card"><div class="stat-val" id="stat-members">—</div><div class="stat-lbl">Участников</div></div>
+    <div class="glass stat-card"><div class="stat-val" id="stat-trophies">—</div><div class="stat-lbl">Кубков</div></div>
+    <div class="glass stat-card"><div class="stat-val" id="stat-avg">—</div><div class="stat-lbl">Avg 🏆</div></div>
   </div>
 
-  <!-- ADMIN PANEL (visible only for admins) -->
+  <!-- ADMIN PANEL -->
   <div class="glass admin-panel" id="admin-panel" style="display:none">
-    <div class="admin-title">
-      Панель управления
+    <div class="admin-top">
+      <div class="sec-title" style="margin:0;flex:1">Новая новость</div>
       <span class="admin-badge">Admin</span>
     </div>
-    <div class="sec-title">Добавить новость</div>
-    <input class="m-input" id="a-title" type="text" placeholder="Заголовок новости">
-    <input class="m-input" id="a-img" type="text" placeholder="URL обложки (необязательно)">
-    <textarea class="m-input" id="a-content" placeholder="Текст новости (необязательно)"></textarea>
+    <input class="m-input" id="a-title"   type="text" placeholder="Заголовок">
+    <input class="m-input" id="a-img"     type="text" placeholder="URL обложки (необязательно)">
+    <textarea class="m-input" id="a-content" placeholder="Текст (необязательно)"></textarea>
     <div class="m-err" id="a-err"></div>
-    <button class="btn-submit" onclick="postNews()">Опубликовать →</button>
+    <button class="btn accent wide" onclick="postNews()">Опубликовать →</button>
   </div>
 
   <!-- CHART + MEMBERS -->
   <div class="main-grid">
 
-    <!-- CHART -->
     <div class="glass chart-card">
-      <div class="chart-header">
+      <div class="chart-top">
         <div class="sec-title" style="margin:0">График кубков</div>
         <div class="chart-filters">
           <button class="cf-btn" onclick="filterChart('1d',this)">1Д</button>
@@ -642,44 +334,36 @@ textarea.m-input { resize: vertical; min-height: 80px; }
           <button class="cf-btn active" onclick="filterChart('all',this)">Всё</button>
         </div>
       </div>
-      <div class="chart-legend" style="margin-top:10px">
-        <span><span class="dot" style="background:#4ade80"></span>Daily</span>
-        <span><span class="dot" style="background:#67e8f9"></span>Weekly</span>
-        <span><span class="dot" style="background:#c084fc"></span>Total</span>
+      <div class="chart-legend">
+        <span><span class="ldot" style="background:var(--green)"></span>Daily</span>
+        <span><span class="ldot" style="background:var(--cyan)"></span>Weekly</span>
+        <span><span class="ldot" style="background:var(--purple)"></span>Total</span>
       </div>
-      <div id="main-chart" style="width:100%;height:240px"></div>
+      <div id="main-chart"></div>
     </div>
 
-    <!-- MEMBERS -->
     <div class="glass members-card">
       <div class="sec-title">Участники</div>
       <div class="members-head">
-        <span>#</span>
-        <span></span>
-        <span>Игрок</span>
-        <span style="overflow:hidden;text-overflow:ellipsis">Тег</span>
-        <span style="text-align:right">🏆</span>
+        <span>#</span><span></span><span>Игрок</span>
+        <span class="m-tag-col">Тег</span><span style="text-align:right">🏆</span>
       </div>
       <div id="members-list">
-        <div class="skel" style="height:44px;margin-bottom:5px"></div>
-        <div class="skel" style="height:44px;margin-bottom:5px"></div>
-        <div class="skel" style="height:44px;margin-bottom:5px"></div>
+        <div class="skel" style="height:46px;margin-bottom:5px"></div>
+        <div class="skel" style="height:46px;margin-bottom:5px"></div>
+        <div class="skel" style="height:46px"></div>
       </div>
-      <button class="btn-glass" id="show-more-btn" onclick="showMore()" style="display:none;width:100%;margin-top:10px;justify-content:center">
-        Показать ещё
-      </button>
+      <button class="btn wide" id="show-more-btn" onclick="showMore()" style="display:none;margin-top:10px">Показать ещё</button>
     </div>
   </div>
 
   <!-- NEWS -->
-  <div class="news-section">
-    <div class="sec-title">Новости клуба</div>
-    <div class="news-grid" id="news-grid">
-      <div class="skel" style="height:160px"></div>
-      <div class="skel" style="height:160px"></div>
-      <div class="skel" style="height:160px"></div>
-      <div class="skel" style="height:160px"></div>
-    </div>
+  <div class="sec-title" style="margin-bottom:12px">Новости клуба</div>
+  <div class="news-grid" id="news-grid">
+    <div class="skel" style="height:150px"></div>
+    <div class="skel" style="height:150px"></div>
+    <div class="skel" style="height:150px"></div>
+    <div class="skel" style="height:150px"></div>
   </div>
 
 </div>
@@ -690,22 +374,34 @@ textarea.m-input { resize: vertical; min-height: 80px; }
     <div class="modal-title">BLEACH ID</div>
     <div class="modal-tabs">
       <button class="mtab active" id="tab-l" onclick="switchTab('login')">Войти</button>
-      <button class="mtab" id="tab-r" onclick="switchTab('register')">Регистрация</button>
+      <button class="mtab"        id="tab-r" onclick="switchTab('register')">Регистрация</button>
     </div>
     <div id="form-login">
-      <input class="m-input" id="l-user" type="text" placeholder="Логин">
+      <input class="m-input" id="l-user" type="text"     placeholder="Логин">
       <input class="m-input" id="l-pass" type="password" placeholder="Пароль">
       <div class="m-err" id="l-err"></div>
-      <button class="btn-submit" onclick="handleLogin()">Войти →</button>
+      <button class="btn accent wide" onclick="handleLogin()">Войти →</button>
     </div>
     <div id="form-reg" style="display:none">
-      <input class="m-input" id="r-user" type="text" placeholder="Логин (мин. 3 символа)">
-      <input class="m-input" id="r-pass" type="password" placeholder="Пароль (мин. 6 символов)">
+      <input class="m-input" id="r-user"  type="text"     placeholder="Логин (мин. 3 символа)">
+      <input class="m-input" id="r-pass"  type="password" placeholder="Пароль (мин. 6 символов)">
       <input class="m-input" id="r-pass2" type="password" placeholder="Повтори пароль">
       <div class="m-err" id="r-err"></div>
-      <button class="btn-submit" onclick="handleRegister()">Создать аккаунт →</button>
+      <button class="btn accent wide" onclick="handleRegister()">Создать аккаунт →</button>
     </div>
-    <button class="btn-cancel" onclick="closeModal('m-auth')">Отмена</button>
+    <button class="m-cancel" onclick="closeModal('m-auth')">Отмена</button>
+  </div>
+</div>
+
+<!-- NEWS MODAL -->
+<div class="modal" id="m-news" onclick="if(event.target===this)closeModal('m-news')">
+  <div class="glass modal-box wide">
+    <img class="news-modal-img" id="nm-img" src="" alt="">
+    <div class="news-modal-title" id="nm-title"></div>
+    <div class="news-modal-date"  id="nm-date"></div>
+    <div class="news-modal-content" id="nm-content"></div>
+    <div style="height:16px"></div>
+    <button class="btn wide" onclick="closeModal('m-news')">Закрыть</button>
   </div>
 </div>
 
@@ -714,71 +410,66 @@ const API = 'https://bleach1.evgen20111110.workers.dev/api';
 let allMembers = [], showCount = 5, chartData = [];
 let chartInst = null, sSeries, wSeries, tSeries;
 
-// ── ROLES ──
 const ROLES = {
-  president:    { label: 'President',      cls: 'role-president' },
-  vicePresident:{ label: 'Vice President', cls: 'role-vice' },
-  senior:       { label: 'Senior',         cls: 'role-senior' },
-  member:       { label: 'Member',         cls: 'role-member' },
+  president:     { label:'President',      cls:'role-president' },
+  vicePresident: { label:'Vice President', cls:'role-vice' },
+  senior:        { label:'Senior',         cls:'role-senior' },
+  member:        { label:'Member',         cls:'role-member' },
 };
-function roleInfo(r) { return ROLES[r] || { label: r || 'Member', cls: 'role-member' }; }
+function roleInfo(r) { return ROLES[r] || { label: r || 'Member', cls:'role-member' }; }
+function rankCls(i)  { return i===0?'gold':i===1?'silver':i===2?'bronze':''; }
 
-// ── MODAL ──
+// ── MODALS ──
 function openModal(id)  { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 document.querySelectorAll('.modal').forEach(m =>
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); })
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('active'); })
 );
 
+// ── TABS ──
 function switchTab(t) {
-  const isL = t === 'login';
-  document.getElementById('form-login').style.display = isL ? '' : 'none';
-  document.getElementById('form-reg').style.display   = isL ? 'none' : '';
-  document.getElementById('tab-l').classList.toggle('active', isL);
-  document.getElementById('tab-r').classList.toggle('active', !isL);
+  const l = t==='login';
+  document.getElementById('form-login').style.display = l?'':'none';
+  document.getElementById('form-reg').style.display   = l?'none':'';
+  document.getElementById('tab-l').classList.toggle('active', l);
+  document.getElementById('tab-r').classList.toggle('active', !l);
 }
 
 // ── AUTH ──
-function getUser() { try { return JSON.parse(localStorage.getItem('auth_user')); } catch { return null; } }
+function getUser() { try{ return JSON.parse(localStorage.getItem('auth_user')); }catch{ return null; } }
 
 function updateAuthUI() {
   const u = getUser();
-  const ap = document.getElementById('admin-panel');
-  if (!u) { ap.style.display = 'none'; return; }
-  const isAdmin = u.role === 'admin';
+  document.getElementById('admin-panel').style.display = (u?.role==='admin') ? '' : 'none';
+  if (!u) return;
+  const admin = u.role==='admin';
   document.getElementById('auth-ui').innerHTML = `
-    <div class="user-display">
+    <div style="display:flex;align-items:center;gap:8px">
       <div class="user-pill">
-        <div class="user-avatar-sm">${isAdmin ? '👑' : '👤'}</div>
+        <div class="user-avatar-sm">${admin?'👑':'👤'}</div>
         <div>
           <div class="user-name-txt">${u.login}</div>
-          <div class="user-role-txt">${isAdmin ? 'Admin' : 'Участник'}</div>
+          <div class="user-role-txt">${admin?'Admin':'Участник'}</div>
         </div>
       </div>
-      <button class="btn-glass" onclick="logout()">Выйти</button>
+      <button class="btn" onclick="logout()">Выйти</button>
     </div>`;
-  if (isAdmin) ap.style.display = '';
 }
 
 function logout() { localStorage.removeItem('auth_user'); location.reload(); }
 
 async function handleLogin() {
-  const login = document.getElementById('l-user').value.trim();
+  const login    = document.getElementById('l-user').value.trim();
   const password = document.getElementById('l-pass').value;
-  const err = document.getElementById('l-err');
+  const err      = document.getElementById('l-err');
   err.textContent = '';
-  if (!login || !password) { err.textContent = 'Заполни все поля'; return; }
+  if (!login||!password) { err.textContent='Заполни все поля'; return; }
   try {
-    const r = await fetch(`${API}/login`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({login, password})
-    });
+    const r = await fetch(`${API}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login,password})});
     const d = await r.json();
-    if (r.ok) {
-      localStorage.setItem('auth_user', JSON.stringify({login: d.login, role: d.role}));
-      closeModal('m-auth'); updateAuthUI();
-    } else { err.textContent = d.error || 'Неверные данные'; }
-  } catch { err.textContent = 'Ошибка соединения'; }
+    if (r.ok) { localStorage.setItem('auth_user',JSON.stringify({login:d.login,role:d.role})); closeModal('m-auth'); updateAuthUI(); }
+    else err.textContent = d.error||'Неверные данные';
+  } catch { err.textContent='Ошибка соединения'; }
 }
 
 async function handleRegister() {
@@ -787,20 +478,15 @@ async function handleRegister() {
   const pass2 = document.getElementById('r-pass2').value;
   const err   = document.getElementById('r-err');
   err.textContent = '';
-  if (login.length < 3) { err.textContent = 'Логин минимум 3 символа'; return; }
-  if (pass.length < 6)  { err.textContent = 'Пароль минимум 6 символов'; return; }
-  if (pass !== pass2)   { err.textContent = 'Пароли не совпадают'; return; }
+  if (login.length<3) { err.textContent='Логин минимум 3 символа'; return; }
+  if (pass.length<6)  { err.textContent='Пароль минимум 6 символов'; return; }
+  if (pass!==pass2)   { err.textContent='Пароли не совпадают'; return; }
   try {
-    const r = await fetch(`${API}/register`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({login, password: pass})
-    });
+    const r = await fetch(`${API}/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login,password:pass})});
     const d = await r.json();
-    if (r.ok) {
-      localStorage.setItem('auth_user', JSON.stringify({login: d.login, role: 'user'}));
-      closeModal('m-auth'); updateAuthUI();
-    } else { err.textContent = d.error || 'Ошибка'; }
-  } catch { err.textContent = 'Ошибка соединения'; }
+    if (r.ok) { localStorage.setItem('auth_user',JSON.stringify({login:d.login,role:'user'})); closeModal('m-auth'); updateAuthUI(); }
+    else err.textContent = d.error||'Ошибка';
+  } catch { err.textContent='Ошибка соединения'; }
 }
 
 // ── ADMIN: POST NEWS ──
@@ -809,106 +495,81 @@ async function postNews() {
   const img     = document.getElementById('a-img').value.trim();
   const content = document.getElementById('a-content').value.trim();
   const err     = document.getElementById('a-err');
-  err.textContent = '';
-  if (!title) { err.textContent = 'Введи заголовок'; return; }
+  err.textContent=''; err.style.color='';
+  if (!title) { err.textContent='Введи заголовок'; return; }
   try {
-    const r = await fetch(`${API}/news`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({title, cover_url: img, content})
-    });
+    const r = await fetch(`${API}/news`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,cover_url:img,content})});
     const d = await r.json();
     if (r.ok) {
-      document.getElementById('a-title').value = '';
-      document.getElementById('a-img').value = '';
-      document.getElementById('a-content').value = '';
-      err.style.color = '#4ade80';
-      err.textContent = '✓ Новость опубликована';
-      setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 3000);
-      loadNews();
-    } else { err.textContent = d.error || 'Ошибка'; }
-  } catch { err.textContent = 'Ошибка соединения'; }
+      document.getElementById('a-title').value='';
+      document.getElementById('a-img').value='';
+      document.getElementById('a-content').value='';
+      err.style.color='var(--green)'; err.textContent='✓ Опубликовано';
+      setTimeout(()=>{err.textContent='';err.style.color='';},3000);
+      init();
+    } else err.textContent = d.error||'Ошибка';
+  } catch { err.textContent='Ошибка соединения'; }
 }
 
 // ── MEMBERS ──
-function rankCls(i) { return i===0?'gold':i===1?'silver':i===2?'bronze':''; }
-
 function renderMembers() {
   const vis = allMembers.slice(0, showCount);
-  document.getElementById('members-list').innerHTML = vis.map((m, i) => {
+  document.getElementById('members-list').innerHTML = vis.map((m,i) => {
     const ri = roleInfo(m.role);
-    const iconUrl = m.iconId
-      ? `https://cdn.brawlify.com/profile-icons/regular/${m.iconId}.png`
-      : '';
+    const iconUrl = m.iconId ? `https://cdn.brawlify.com/profile-icons/regular/${m.iconId}.png` : '';
     return `
     <div class="member-row">
       <div class="m-rank ${rankCls(i)}">${i+1}</div>
       <div class="m-avatar">
-        ${iconUrl
-          ? `<img src="${iconUrl}" alt="" onerror="this.parentElement.innerHTML='👤'">`
-          : '👤'}
+        ${iconUrl?`<img src="${iconUrl}" alt="" onerror="this.parentElement.innerHTML='👤'">` : '👤'}
       </div>
       <div class="m-info">
         <div class="m-name">${m.name}</div>
         <div class="m-role ${ri.cls}">${ri.label}</div>
       </div>
-      <div class="m-tag">${m.tag}</div>
+      <div class="m-tag-col">${m.tag}</div>
       <div class="m-trophies">${m.trophies.toLocaleString()} 🏆</div>
     </div>`;
   }).join('');
-  document.getElementById('show-more-btn').style.display =
-    allMembers.length > showCount ? '' : 'none';
+  document.getElementById('show-more-btn').style.display = allMembers.length>showCount?'':'none';
 }
-function showMore() { showCount += 5; renderMembers(); }
+function showMore() { showCount+=5; renderMembers(); }
 
 // ── CHART ──
 function buildSeries(pts) {
-  const total  = pts.map(p => ({time: p.time, value: p.value}));
-  const daily  = pts.map((p,i) => ({time: p.time, value: i===0?0:Math.max(0,p.value-pts[i-1].value)}));
-  const weekly = pts.map((p,i) => {
-    const sl = pts.slice(Math.max(0,i-6),i+1);
-    return {time:p.time, value:Math.round(sl.reduce((s,x)=>s+x.value,0)/sl.length)};
+  const total  = pts.map(p=>({time:p.time,value:p.value}));
+  const daily  = pts.map((p,i)=>({time:p.time,value:i===0?0:Math.max(0,p.value-pts[i-1].value)}));
+  const weekly = pts.map((p,i)=>{
+    const sl=pts.slice(Math.max(0,i-6),i+1);
+    return {time:p.time,value:Math.round(sl.reduce((s,x)=>s+x.value,0)/sl.length)};
   });
-  return {total, daily, weekly};
+  return {total,daily,weekly};
 }
 function updateChart(pts) {
-  if (!pts.length) return;
-  const {total,daily,weekly} = buildSeries(pts);
+  if(!pts.length) return;
+  const {total,daily,weekly}=buildSeries(pts);
   sSeries.setData(daily); wSeries.setData(weekly); tSeries.setData(total);
   chartInst.timeScale().fitContent();
 }
-function filterChart(r, btn) {
-  document.querySelectorAll('.cf-btn').forEach(b => b.classList.remove('active'));
+function filterChart(r,btn) {
+  document.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const now = Math.floor(Date.now()/1000);
-  let f = [...chartData];
-  if (r==='1d') f = chartData.filter(p => p.time >= now-86400);
-  if (r==='1m') f = chartData.filter(p => p.time >= now-2592000);
-  if (!f.length) f = chartData;
+  const now=Math.floor(Date.now()/1000);
+  let f=[...chartData];
+  if(r==='1d') f=chartData.filter(p=>p.time>=now-86400);
+  if(r==='1m') f=chartData.filter(p=>p.time>=now-2592000);
+  if(!f.length) f=chartData;
   updateChart(f);
 }
 
-// ── LOAD NEWS ──
-async function loadNews() {
-  try {
-    const res = await fetch(`${API}/data`);
-    const data = await res.json();
-    renderNews(data.news || []);
-  } catch {}
-}
-function renderNews(news) {
-  document.getElementById('news-grid').innerHTML = news.length
-    ? news.map(n => `
-      <div class="glass news-card">
-        <div class="news-thumb">
-          <img src="${n.image_url||''}" alt="${n.title||''}"
-               onerror="this.style.display='none'">
-        </div>
-        <div class="news-body">
-          <div class="news-title">${n.title||''}</div>
-          <div class="news-date">${(n.created_at||'').split(' ')[0]}</div>
-        </div>
-      </div>`).join('')
-    : '<div class="empty" style="grid-column:1/-1">Новостей пока нет</div>';
+// ── NEWS MODAL ──
+function openNews(n) {
+  document.getElementById('nm-img').src       = n.image_url||'';
+  document.getElementById('nm-img').style.display = n.image_url?'':'none';
+  document.getElementById('nm-title').textContent   = n.title||'';
+  document.getElementById('nm-date').textContent    = (n.created_at||'').split(' ')[0];
+  document.getElementById('nm-content').textContent = n.content||'';
+  openModal('m-news');
 }
 
 // ── INIT ──
@@ -916,69 +577,98 @@ async function init() {
   updateAuthUI();
   try {
     const res = await fetch(`${API}/data`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    // Club badge
-    if (data.club?.badgeId) {
-      document.getElementById('club-badge').src =
-        `https://cdn.brawlify.com/club/regular/${data.club.badgeId}.png`;
-    }
+    // Badge
+    if(data.club?.badgeId)
+      document.getElementById('club-badge').src=`https://cdn.brawlify.com/club/regular/${data.club.badgeId}.png`;
 
     // Stats
-    const members = data.club?.members || [];
-    allMembers = members.sort((a,b) => b.trophies - a.trophies);
-    const totalTr = members.reduce((s,m) => s+m.trophies, 0);
-    const avg = members.length ? Math.round(totalTr/members.length) : 0;
-    document.getElementById('stat-members').textContent  = members.length || '—';
-    document.getElementById('stat-trophies').textContent = totalTr ? (totalTr/1000).toFixed(0)+'k' : '—';
-    document.getElementById('stat-avg').textContent      = avg ? avg.toLocaleString() : '—';
+    const members = data.club?.members||[];
+    allMembers = members.sort((a,b)=>b.trophies-a.trophies);
+    const totalTr = members.reduce((s,m)=>s+m.trophies,0);
+    const avg = members.length ? Math.round(totalTr/members.length):0;
+    document.getElementById('stat-members').textContent  = members.length||'—';
+    document.getElementById('stat-trophies').textContent = totalTr?(totalTr/1000).toFixed(0)+'k':'—';
+    document.getElementById('stat-avg').textContent      = avg?avg.toLocaleString():'—';
 
     // Members
-    if (allMembers.length) renderMembers();
-    else document.getElementById('members-list').innerHTML = '<div class="empty">Нет данных</div>';
+    if(allMembers.length) renderMembers();
+    else document.getElementById('members-list').innerHTML='<div class="empty">Нет данных</div>';
 
-    // Chart
+    // Chart — строим из реальных данных если есть, иначе из текущих тропхи
     chartData = (data.chart||[])
-      .map(p => ({time:parseInt(p.time), value:parseInt(p.value)}))
-      .filter(p => p.time>0 && p.value>0);
-    if (chartData.length < 2) chartData = [
-      {time:1711200000,value:180000},{time:1711286400,value:190000},
-      {time:1711372800,value:200000},{time:1711459200,value:209093}
-    ];
+      .map(p=>({time:parseInt(p.time),value:parseInt(p.value)}))
+      .filter(p=>p.time>0&&p.value>0);
 
-    chartInst = LightweightCharts.createChart(document.getElementById('main-chart'), {
-      layout: { background:{type:'solid',color:'transparent'}, textColor:'rgba(240,238,255,0.45)' },
-      grid: { vertLines:{color:'rgba(255,255,255,0.04)'}, horzLines:{color:'rgba(255,255,255,0.04)'} },
-      timeScale: { borderVisible:false, timeVisible:true },
-      rightPriceScale: { borderVisible:false },
-      handleScale: false,
+    // Fallback с реальными кубками клуба
+    if(chartData.length<2) {
+      const now=Math.floor(Date.now()/1000);
+      const tr = totalTr||209093;
+      chartData=[
+        {time:now-86400*6,value:Math.round(tr*0.93)},
+        {time:now-86400*5,value:Math.round(tr*0.95)},
+        {time:now-86400*4,value:Math.round(tr*0.96)},
+        {time:now-86400*3,value:Math.round(tr*0.97)},
+        {time:now-86400*2,value:Math.round(tr*0.98)},
+        {time:now-86400,  value:Math.round(tr*0.99)},
+        {time:now,        value:tr},
+      ];
+    }
+
+    chartInst = LightweightCharts.createChart(document.getElementById('main-chart'),{
+      layout:{ background:{type:'solid',color:'transparent'}, textColor:'rgba(240,238,255,0.45)' },
+      grid:{ vertLines:{color:'rgba(255,255,255,0.04)'}, horzLines:{color:'rgba(255,255,255,0.05)'} },
+      timeScale:{ borderVisible:false, timeVisible:true },
+      rightPriceScale:{ borderVisible:false },
+      handleScroll:{ mouseWheel:false, pressedMouseMove:true, horzTouchDrag:true },
+      handleScale:{ mouseWheel:false, pinch:false },
+      crosshair:{ mode:1 },
+      width: document.getElementById('main-chart').clientWidth,
+      height: 220,
     });
-    sSeries = chartInst.addLineSeries({color:'#4ade80', lineWidth:2, priceLineVisible:false});
-    wSeries = chartInst.addLineSeries({color:'#67e8f9', lineWidth:2, priceLineVisible:false});
+
+    sSeries = chartInst.addLineSeries({color:'#4ade80',lineWidth:2,priceLineVisible:false,lastValueVisible:false});
+    wSeries = chartInst.addLineSeries({color:'#67e8f9',lineWidth:2,priceLineVisible:false,lastValueVisible:false});
     tSeries = chartInst.addAreaSeries({
-      lineColor:'#c084fc',
-      topColor:'rgba(192,132,252,0.2)',
-      bottomColor:'transparent',
-      lineWidth:2, priceLineVisible:false
+      lineColor:'#c084fc',topColor:'rgba(192,132,252,0.18)',bottomColor:'transparent',
+      lineWidth:2,priceLineVisible:false,lastValueVisible:false
     });
     updateChart(chartData);
 
+    // Resize observer
+    new ResizeObserver(()=>{
+      chartInst.applyOptions({width:document.getElementById('main-chart').clientWidth});
+    }).observe(document.getElementById('main-chart'));
+
     // News
-    renderNews(data.news || []);
+    const news = data.news||[];
+    document.getElementById('news-grid').innerHTML = news.length
+      ? news.map(n=>`
+          <div class="glass news-card" onclick='openNews(${JSON.stringify(n)})'>
+            <div class="news-thumb">
+              <img src="${n.image_url||''}" alt="${n.title||''}" onerror="this.style.display='none'">
+            </div>
+            <div class="news-body">
+              <div class="news-title">${n.title||''}</div>
+              <div class="news-date">${(n.created_at||'').split(' ')[0]}</div>
+            </div>
+          </div>`).join('')
+      : '<div class="empty" style="grid-column:1/-1">Новостей пока нет</div>';
 
   } catch(e) {
     console.error(e);
-    document.getElementById('members-list').innerHTML =
-      `<div class="empty" style="color:var(--red)">Ошибка: ${e.message}</div>`;
-    document.getElementById('news-grid').innerHTML = '';
+    document.getElementById('members-list').innerHTML=`<div class="empty" style="color:var(--red)">Ошибка: ${e.message}</div>`;
+    document.getElementById('news-grid').innerHTML='';
   }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  if (!document.getElementById('form-login').style.display || document.getElementById('form-login').style.display === '')
-    handleLogin();
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  const fl=document.getElementById('form-login');
+  if(fl&&fl.style.display!=='none') handleLogin();
+  else handleRegister();
 });
 
 init();
